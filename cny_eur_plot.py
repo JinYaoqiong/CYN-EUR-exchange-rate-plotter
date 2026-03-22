@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import xml.etree.ElementTree as ET
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import seaborn as sns
 
 # ECB API URL for historical exchange rates
 API_URL = 'https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist.xml'
@@ -48,14 +49,42 @@ def plot_exchange_rate_trend(df):
         print("No data to plot.")
         return
 
-    plt.figure(figsize=(10, 5))
-    plt.plot(df['date'], df['rate'], marker='o', label='CNY/EUR Exchange Rate')
-    plt.xlabel('Date')
-    plt.ylabel('Rate (CNY per EUR)')
-    plt.title('CNY/EUR Exchange Rate Trend (Last 7 Days)')
-    plt.legend()
-    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
-    plt.gca().xaxis.set_major_locator(mdates.DayLocator())
+    sns.set_theme(
+        context='paper',
+        style='ticks',
+        palette='colorblind',
+        rc={
+            'figure.dpi': 120,
+            'savefig.dpi': 300,
+            'axes.linewidth': 1.0,
+            'lines.linewidth': 2.0,
+            'lines.markersize': 6,
+            'grid.linewidth': 0.6,
+            'grid.alpha': 0.3,
+            'font.sans-serif': ['Microsoft YaHei', 'SimHei', 'Noto Sans CJK SC', 'Arial Unicode MS', 'DejaVu Sans'],
+            'axes.unicode_minus': False
+        }
+    )
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+    sns.lineplot(
+        data=df,
+        x='date',
+        y='rate',
+        marker='o',
+        errorbar=None,
+        label='CNY/EUR Exchange Rate',
+        ax=ax
+    )
+    ax.set_xlabel('日期 Date')
+    ax.set_ylabel('汇率 Rate (CNY per EUR)')
+    ax.set_title('人民币兑欧元汇率走势（近7日）\nCNY/EUR Exchange Rate Trend (Last 7 Days)')
+    ax.legend(frameon=False)
+    ax.grid(True, axis='y')
+    sns.despine(ax=ax)
+
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+    ax.xaxis.set_major_locator(mdates.DayLocator())
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.savefig('cny_eur_trend.png')
